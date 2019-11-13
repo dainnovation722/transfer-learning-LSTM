@@ -1,4 +1,4 @@
 .vscode/
 *.ipynb
-
-
+.ipynb_checkpoints
+dataset/elect_load_diagram/
