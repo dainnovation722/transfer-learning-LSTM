@@ -1,0 +1,1 @@
+python main.py pre-train && python main.py transfer-learning
