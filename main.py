@@ -60,7 +60,7 @@ def build_model(input_shape:tuple, pre_model=None) -> list:
 
 	if pre_model is not None:
 
-		for i in range(len(model.layers)): #range(1,len(model.layers))またはrange(2,len(model.layers))
+		for i in range(2,len(model.layers)): 
 			model.layers[i].set_weights(pre_model.layers[i].get_weights())
 
 	model.compile(loss='mse', optimizer = Adam(), metrics=['accuracy'])
@@ -158,7 +158,7 @@ if __name__ == '__main__':
 				if not os.path.exists(f'dataset/{source}/X_train.pkl'): continue		
 				if source in targets: continue
 				# データセットの読み込み
-				X_train, y_train, X_test, y_test = read_data_from_dataset(source)
+				X_train, y_train, X_test, y_test = read_data_from_dataset(target)
 				X_train_time, y_train_time = generator(X_train, y_train)
 				X_test_time, y_test_time = generator(X_test, y_test)
 				# 保存先フォルダー作成
