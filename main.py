@@ -7,7 +7,7 @@ import keras
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-plt.rcParams["font.size"] = 18
+plt.rcParams["font.size"] = 13
 
 from sklearn.metrics import mean_squared_error as mse
 
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 				early_stopping = EarlyStopping(patience=5)
 				# 学習スケジューラー
 				reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
-					min_lr=0.0001)
+						min_lr=0.0001)
 				# モデルチェックポイント
 				model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss',
 					save_best_only=True)
