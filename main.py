@@ -119,7 +119,8 @@ def train(pre_model=None):
 	keras.backend.clear_session()
 
 if __name__ == '__main__':
-
+	
+	early_stop = 10
 	nb_epochs = 50
 	verbose = 1
 	
@@ -139,7 +140,7 @@ if __name__ == '__main__':
 			print('Learning from '+source)
 			print(f'data shape : {X_train_time.shape}')
 			# 学習打ち切り
-			early_stopping = EarlyStopping(patience=5)
+			early_stopping = EarlyStopping(patience=early_stop)
 			# 学習スケジューラー
 			reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
 					min_lr=0.0001)
@@ -169,7 +170,7 @@ if __name__ == '__main__':
 				# 事前学習済みモデルの読み込み
 				pre_model = load_model(f'pre-train/{source}/best_model.hdf5')
 				# 学習打ち切り
-				early_stopping = EarlyStopping(patience=5)
+				early_stopping = EarlyStopping(patience=early_stop)
 				# 学習スケジューラー
 				reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
 						min_lr=0.0001)
