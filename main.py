@@ -62,7 +62,7 @@ def build_model(input_shape:tuple, pre_model=None) -> list:
 
 		for i in range(2,len(model.layers)): 
 			model.layers[i].set_weights(pre_model.layers[i].get_weights())
-
+	
 	model.compile(loss='mse', optimizer = Adam(), metrics=['accuracy'])
 
 	return model
@@ -123,6 +123,7 @@ if __name__ == '__main__':
 	early_stop = 10
 	nb_epochs = 50
 	verbose = 1
+	targets = ['sru','debutanizer']
 	
 	if sys.argv[1] == 'pre-train':
 		
@@ -152,7 +153,7 @@ if __name__ == '__main__':
 			train()
 
 	if sys.argv[1] == 'transfer-learning':
-		targets = ['sru','debutanizer']
+		
 		for target in targets: 
 			for source in os.listdir('dataset'): 
 				# sourceデータセットにpickleファイルがない場合は次のsourceデータセットへ
@@ -180,3 +181,5 @@ if __name__ == '__main__':
 				callbacks=[early_stopping, reduce_lr,model_checkpoint]
 
 				train(pre_model)
+
+			
