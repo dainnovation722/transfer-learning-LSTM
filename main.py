@@ -182,4 +182,16 @@ if __name__ == '__main__':
 
 				train(pre_model)
 
+	if sys.argv[1] == 'data-info':
+		print('='*30)
+		print('dataset name	    shape')
+		for data in os.listdir('dataset'):
+			
+			if not os.path.exists(f'dataset/{data}/X_train.pkl'): continue
+			X_train, y_train, X_test, y_test = read_data_from_dataset(data)
+			print('-'*30)
+			print('{:<15}'.format(data), end='')
+			print('{:>15}'.format(str(X_train.shape)))
+		print('-'*30)
+			
 			
