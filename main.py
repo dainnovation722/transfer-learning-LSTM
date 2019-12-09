@@ -26,7 +26,7 @@ def read_data_from_dataset(dname:str) -> np.array:
     for fname in ['X_train', 'y_train', 'X_test', 'y_test']:
         with open(f'dataset/{dname}/{fname}.pkl', 'rb') as f:
             data = pickle.load(f)
-            data_list.append(data[:100])
+            data_list.append(data)
     return data_list[0], data_list[1], data_list[2], data_list[3]
 
 def generator(X:np.array, y:np.array) -> np.array:
