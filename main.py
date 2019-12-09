@@ -1,13 +1,16 @@
 from keras.layers import Input, Dense, Activation, BatchNormalization
 from keras.layers import CuDNNLSTM as LSTM
+from keras.layers.wrappers import TimeDistributed
 from keras.models import Model, load_model
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
+from keras.callbacks import CSVLogger, ModelCheckpoint, ReduceLROnPlateau
 import keras
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rcParams["font.size"] = 13
+import warnings
+warnings.simplefilter('ignore')
 
 from sklearn.metrics import mean_squared_error as mse
 
@@ -23,7 +26,7 @@ def read_data_from_dataset(dname:str) -> np.array:
     for fname in ['X_train', 'y_train', 'X_test', 'y_test']:
         with open(f'dataset/{dname}/{fname}.pkl', 'rb') as f:
             data = pickle.load(f)
-            data_list.append(data)
+            data_list.append(data[:100])
     return data_list[0], data_list[1], data_list[2], data_list[3]
 
 def generator(X:np.array, y:np.array) -> np.array:
@@ -45,7 +48,9 @@ def build_model(input_shape:tuple, pre_model=None) -> list:
 	'''学習モデルを構築'''
 	input_layer = Input(input_shape)
 
-	lstm1 = LSTM(25, return_sequences=True)(input_layer)
+	dense = TimeDistributed(Dense(50))(input_layer)
+
+	lstm1 = LSTM(25, return_sequences=True)(dense)
 	lstm1 = BatchNormalization()(lstm1)
 
 	lstm2 = LSTM(50, return_sequences=True)(lstm1)
@@ -64,7 +69,6 @@ def build_model(input_shape:tuple, pre_model=None) -> list:
 			model.layers[i].set_weights(pre_model.layers[i].get_weights())
 	
 	model.compile(loss='mse', optimizer = Adam(), metrics=['accuracy'])
-
 	return model
 
 def save_fig(hist, y_pred_time):
@@ -100,7 +104,6 @@ def train(pre_model=None):
 
 	hist = model.fit(X_train_time, y_train_time, batch_size=mini_batch_size, epochs=nb_epochs,
 		verbose=verbose, validation_data=(X_test_time, y_test_time), callbacks=callbacks)
-
 	
 	model = load_model(file_path)
 
@@ -120,11 +123,10 @@ def train(pre_model=None):
 
 if __name__ == '__main__':
 	
-	early_stop = 10
 	nb_epochs = 50
 	verbose = 1
 	targets = ['sru','debutanizer']
-	
+	print('='*140)
 	if sys.argv[1] == 'pre-train':
 		
 		for source in os.listdir('dataset'):
@@ -139,18 +141,20 @@ if __name__ == '__main__':
 			if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
 			file_path = write_output_dir + 'best_model.hdf5'
 			print('Learning from '+source)
-			print(f'data shape : {X_train_time.shape}')
-			# 学習打ち切り
-			early_stopping = EarlyStopping(patience=early_stop)
+			print(f'Source Data Shape : {X_train_time.shape}')
 			# 学習スケジューラー
-			reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
+			reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50,
 					min_lr=0.0001)
 			# モデルチェックポイント
-			model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss',
+			model_checkpoint = ModelCheckpoint(filepath=file_path, monitor='val_loss',
 				save_best_only=True)
-			callbacks=[early_stopping, reduce_lr,model_checkpoint]
+			# 各エポックの結果をcsvファイルに保存
+			csv_logger = CSVLogger(write_output_dir+'epoch_log.csv')
+			callbacks=[reduce_lr, model_checkpoint, csv_logger]
 
 			train()
+
+			print('\n'*2+'='*140+'\n'*2)			
 
 	if sys.argv[1] == 'transfer-learning':
 		
@@ -168,25 +172,27 @@ if __name__ == '__main__':
 				if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
 				file_path = write_output_dir+'transferred_best_model.hdf5'
 				print('Tranfering from '+source+' to '+target)
+				print(f'Target Data Shape : {X_train_time.shape}')
 				# 事前学習済みモデルの読み込み
 				pre_model = load_model(f'pre-train/{source}/best_model.hdf5')
-				# 学習打ち切り
-				early_stopping = EarlyStopping(patience=early_stop)
 				# 学習スケジューラー
-				reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
+				reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=50,
 						min_lr=0.0001)
 				# モデルチェックポイント
-				model_checkpoint = keras.callbacks.ModelCheckpoint(filepath=file_path, monitor='loss',
+				model_checkpoint = ModelCheckpoint(filepath=file_path, monitor='loss',
 					save_best_only=True)
-				callbacks=[early_stopping, reduce_lr,model_checkpoint]
+				# 各エポックの結果をcsvファイルに保存
+				csv_logger = CSVLogger(write_output_dir+'epoch_log.csv')
+				callbacks=[reduce_lr, model_checkpoint, csv_logger]
 
 				train(pre_model)
+
+				print('\n'*2+'='*140+'\n'*2)			
 
 	if sys.argv[1] == 'data-info':
 		print('='*30)
 		print('dataset name	    shape')
-		for data in os.listdir('dataset'):
-			
+		for data in os.listdir('dataset'):	
 			if not os.path.exists(f'dataset/{data}/X_train.pkl'): continue
 			X_train, y_train, X_test, y_test = read_data_from_dataset(data)
 			print('-'*30)
@@ -194,4 +200,4 @@ if __name__ == '__main__':
 			print('{:>15}'.format(str(X_train.shape)))
 		print('-'*30)
 			
-			
+	
