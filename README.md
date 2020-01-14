@@ -1,11 +1,8 @@
 
 Transfer Learning LSTM for Time-Seires Regression
 ====   
-
-Overview
-
 ## Description
-This repository is a series of experiments I did.
+This repository is a series of experiments on transfer learning for time-series data regression.
 
 ## Requirement
     pip install requirements.txt
