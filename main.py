@@ -20,11 +20,12 @@ import os
 import pickle
 from time import time
 
-def read_data_from_dataset(dname:str) -> np.array:
+
+def read_data_from_dataset(data_dir_path:str) -> np.array:
     '''データセットから学習データとテストデータを読み込む'''
     data_list=[]
     for fname in ['X_train', 'y_train', 'X_test', 'y_test']:
-        with open(f'dataset/{dname}/{fname}.pkl', 'rb') as f:
+        with open(f'{data_dir_path}/{fname}.pkl', 'rb') as f:
             data = pickle.load(f)
             data_list.append(data)
     return data_list[0], data_list[1], data_list[2], data_list[3]
@@ -43,7 +44,67 @@ def generator(X:np.array, y:np.array) -> np.array:
         y_time[i] = y[i+time_steps]               
     return X_time, y_time
 
+class regressor():
 
+	def __init__(self, input_shape):
+		self.model = self.build_model(input_shape)
+		self.hist = None
+
+	def build_model(self, input_shape:tuple, pre_model=None, verbose=True) -> list:
+		'''学習モデルを構築'''
+		input_layer = Input(input_shape)
+
+		dense = TimeDistributed(Dense(50))(input_layer)
+
+		lstm1 = LSTM(25, return_sequences=True)(dense)
+		lstm1 = BatchNormalization()(lstm1)
+
+		lstm2 = LSTM(50, return_sequences=True)(lstm1)
+		lstm2 = BatchNormalization()(lstm2)
+
+		lstm3 = LSTM(25, return_sequences=False)(lstm2)
+		lstm3 = BatchNormalization()(lstm3)
+
+		output_layer = Dense(1, activation='sigmoid')(lstm3)
+
+		model = Model(inputs=input_layer, outputs=output_layer)
+
+		if pre_model:
+			for i in range(2,len(model.layers)): 
+				model.layers[i].set_weights(pre_model.layers[i].get_weights())
+
+		model.compile(loss='mse', optimizer = Adam(), metrics=['accuracy'])
+		if verbose: print(model.summary())
+		return model
+		
+
+	def fit(self, X, y, nb_batch, nb_epochs, callbacks):
+		X_train = X[:int(X.shape[0]*0.8)]
+		y_train = y[:int(y.shape[0]*0.8)]
+		X_valid = X[int(X.shape[0]*0.8):]
+		y_valid = y[int(y.shape[0]*0.8):]
+		mini_batch_size = X_train.shape[0]//nb_batch
+		self.hist = self.model.fit(X_train, y_train, batch_size=mini_batch_size, epochs=nb_epochs,\
+			verbose=verbose, validation_data=(X_valid, y_valid), callbacks=callbacks)
+	
+	def predict(self, X_test):
+		prediction = self.model.predict(X_test)
+		return prediction
+
+	
+def val(model):
+	save_fig(hist,y_pred_time) #予測モデル図追加
+	
+	accuracy = mse(y_test_time,y_pred_time)
+	
+	duration = time()-start_time
+
+	with open(write_output_dir+'log.txt','w') as f:
+		f.write('duration : {:.3f}\n'.format(duration))
+		f.write('accuracy : {:.3f}'.format(accuracy))
+
+	keras.backend.clear_session()
+	
 def build_model(input_shape:tuple, pre_model=None) -> list:
 	'''学習モデルを構築'''
 	input_layer = Input(input_shape)
@@ -71,8 +132,9 @@ def build_model(input_shape:tuple, pre_model=None) -> list:
 	model.compile(loss='mse', optimizer = Adam(), metrics=['accuracy'])
 	return model
 
-def save_fig(hist, y_pred_time):
+def save_lr_curve(model, write_output_dir):
 	# 学習曲線の保存
+	hist = model.hist
 	plt.figure(figsize=(18,5))
 	plt.plot(hist.history['loss'])
 	plt.plot(hist.history['val_loss'])
@@ -81,59 +143,45 @@ def save_fig(hist, y_pred_time):
 	plt.xlabel('epoch')
 	plt.legend(['train', 'test'], loc='upper right')
 	plt.savefig(write_output_dir + 'learning_curve.png')
-	# テストデータの予測結果の保存
+	
+def save_plot(y_test_time, y_pred_test_time, write_output_dir):
+	# テストデータの予測結果プロットの保存
 	plt.figure(figsize=(18,5))
-	plt.plot([ i for i in range(1, 1+len(y_pred_time))], y_pred_time, 'r',label="predicted")
+	plt.plot([ i for i in range(1, 1+len(y_pred_test_time))], y_pred_test_time, 'r',label="predicted")
 	plt.plot([ i for i in range(1, 1+len(y_test_time))], y_test_time, 'b',label="measured", lw=1, alpha=0.3)
 	plt.ylim(0,1)
 	plt.legend(loc="best")
 	plt.savefig(write_output_dir + 'prediction.png')
 	
-def train(pre_model=None):
-	'''学習実行'''
-	mini_batch_size = X_train_time.shape[0]//20
-	
-	start_time = time()
-
-	input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
-	model = build_model(input_shape, pre_model)
-
-	if verbose == True: 
-		model.summary()
-
-
-	hist = model.fit(X_train_time, y_train_time, batch_size=mini_batch_size, epochs=nb_epochs,
-		verbose=verbose, validation_data=(X_test_time, y_test_time), callbacks=callbacks)
-	
-	model = load_model(file_path)
-
-	y_pred_time = model.predict(X_test_time)
-	
-	save_fig(hist,y_pred_time) #予測モデル図追加
-	
-	accuracy = mse(y_test_time,y_pred_time)
-	
-	duration = time()-start_time
-
+def save_accuracy(y_test_time, y_pred_test_time, model, write_output_dir):
+	#精度の保存
+	accuracy = mse(y_test_time,y_pred_test_time)
 	with open(write_output_dir+'log.txt','w') as f:
-		f.write('duration : {:.3f}\n'.format(duration))
 		f.write('accuracy : {:.3f}'.format(accuracy))
+		f.write('='*30+'\n')
+        
+		model.model.summary(print_fn=lambda x: f.write(x + '\n')) #モデルアーキテクチャー
 
-	keras.backend.clear_session()
+def save(model, y_pred_test_time, y_test_time, write_output_dir):
+	#保存関連の関数のまとめ
+	save_lr_curve(model, write_output_dir)
+	save_plot(y_test_time, y_pred_test_time, write_output_dir)
+	save_accuracy(y_test_time, y_pred_test_time, model, write_output_dir)
 
 if __name__ == '__main__':
-	
-	nb_epochs = 50
+	nb_batch = 20
+	nb_epochs = 3
 	verbose = 1
 	targets = ['sru','debutanizer']
 	print('='*140)
 	if sys.argv[1] == 'pre-train':
 		
-		for source in os.listdir('dataset'):
-			# sourceデータセットにpickleファイルがない場合は次のsourceデータセットへ
-			if not os.path.exists(f'dataset/{source}/X_train.pkl'): continue
+		for source in os.listdir('dataset/source'):
+			data_dir_path = f'dataset/source/{source}' 
+			# pickleファイルがないsourceはスキップ
+			if not os.path.exists(f'{data_dir_path}/X_train.pkl'): continue
 			# データセットの読み込み
-			X_train, y_train, X_test, y_test = read_data_from_dataset(source)
+			X_train, y_train, X_test, y_test = read_data_from_dataset(data_dir_path)
 			X_train_time, y_train_time = generator(X_train, y_train)
 			X_test_time, y_test_time = generator(X_test, y_test)
 			# 保存先フォルダー作成
@@ -143,18 +191,24 @@ if __name__ == '__main__':
 			print('Learning from '+source)
 			print(f'Source Data Shape : {X_train_time.shape}')
 			# 学習スケジューラー
-			reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50,
-					min_lr=0.0001)
+			reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=50, min_lr=0.0001)
 			# モデルチェックポイント
-			model_checkpoint = ModelCheckpoint(filepath=file_path, monitor='val_loss',
-				save_best_only=True)
+			model_checkpoint = ModelCheckpoint(filepath=file_path, monitor='val_loss', save_best_only=True)
 			# 各エポックの結果をcsvファイルに保存
 			csv_logger = CSVLogger(write_output_dir+'epoch_log.csv')
 			callbacks=[reduce_lr, model_checkpoint, csv_logger]
-
-			train()
-
+			input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
+			#モデル構築→学習→推論
+			model = regressor(input_shape)
+			model.fit(X_train_time, y_train_time, nb_batch, nb_epochs, callbacks)
+			y_pred_test_time = model.predict(X_test_time)
+			
+			#学習結果の保存
+			save(model, y_test_time, y_pred_test_time, write_output_dir)
+			
+			keras.backend.clear_session()
 			print('\n'*2+'='*140+'\n'*2)			
+			break
 
 	if sys.argv[1] == 'transfer-learning':
 		
@@ -199,5 +253,7 @@ if __name__ == '__main__':
 			print('{:<15}'.format(data), end='')
 			print('{:>15}'.format(str(X_train.shape)))
 		print('-'*30)
+			
+
 			
 	
