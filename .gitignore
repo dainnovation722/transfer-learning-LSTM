@@ -1,4 +1,9 @@
 .vscode/
 *.ipynb
 .ipynb_checkpoints
-dataset/elect_load_diagram/
+*.swp
+._*
+.DS_Store
+node_modules
+release
+.sass-cache
