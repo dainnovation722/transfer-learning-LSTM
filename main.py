@@ -47,7 +47,7 @@ def make_callbacks(file_path, write_output_dir):
 			
 if __name__ == '__main__':
 	nb_batch = 10
-	nb_epochs = 1
+	nb_epochs = 5
 	verbose = 1 #学習途中の経過
 	time_width = 1000
 	print('='*140)
@@ -85,19 +85,22 @@ if __name__ == '__main__':
 			keras.backend.clear_session()
 			print('\n'*2+'='*140+'\n'*2)
 
-			break			
+				
 
 	if sys.argv[1] == 'transfer-learning':
 		
 		for target in os.listdir('dataset/target'): 
-			if not os.path.exists(f'dataset/{source}/X_train.pkl'): continue		
+			
+			# pickleファイルがないtargetはスキップ
+			if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue		
 
-			for source in os.listdir('dataset/source'): 	
+			for source in os.listdir('pre-train'): 	
 				
 				#sourceとtargetが重複した際はスキップ
-				if source in targets: continue
+				if source==target: continue
 				
 				# データセットの読み込み
+				data_dir_path = f'dataset/target/{target}' 
 				X_train_time, y_train_time, X_test_time, y_test_time = load_dataset(data_dir_path, time_width)
 			
 				# 保存先フォルダー作成
@@ -126,8 +129,7 @@ if __name__ == '__main__':
 				keras.backend.clear_session()
 				print('\n'*2+'='*140+'\n'*2)
 
-				break
-			break			
+				
 
 	if sys.argv[1] == 'data-info':
 		print('='*30)
