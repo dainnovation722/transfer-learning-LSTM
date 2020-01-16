@@ -1,5 +1,5 @@
 from keras.layers import Input, Dense, Activation, BatchNormalization
-from keras.layers import LSTM as LSTM
+from keras.layers import CuDNNLSTM as LSTM
 from keras.layers.wrappers import TimeDistributed
 from keras.models import Model
 from keras.optimizers import Adam
