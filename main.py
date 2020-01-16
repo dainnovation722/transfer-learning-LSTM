@@ -24,8 +24,8 @@ def save(model, y_pred_test_time, y_test_time, write_output_dir):
 	save_plot(y_test_time, y_pred_test_time).savefig(write_output_dir + 'prediction.png')
 	accuracy = mse(y_test_time,y_pred_test_time)
 	with open(write_output_dir+'log.txt','w') as f:
-		f.write('accuracy : {:.3f}'.format(accuracy))
-		f.write('='*30+'\n')       
+		f.write('accuracy : {:.3f}\n'.format(accuracy))
+		f.write('='*65+'\n')       
 		model.model.summary(print_fn=lambda x: f.write(x + '\n')) #モデルアーキテクチャー
 
 def load_dataset(data_dir_path, time_width):
