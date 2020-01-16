@@ -1,2 +1,0 @@
-duration : 550.084
-accuracy : 0.015
