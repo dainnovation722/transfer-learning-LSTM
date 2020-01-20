@@ -92,7 +92,7 @@ def main():
 			print('\nLearning from '+source)
 			print(f'\nSource Data Shape : {X_train_time.shape}\n')
 			
-			break
+			
 			#モデル構築→学習→推論
 			input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
 			model = regressor(input_shape)
@@ -136,7 +136,7 @@ def main():
 
 				print('\nTranfering from '+source+' to '+target)
 				print(f'\nTarget Data Shape : {X_train_time.shape}\n')
-				break
+				
 				#モデル構築→学習→推論
 				input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
 				model = regressor(input_shape, pre_model=pre_model)
