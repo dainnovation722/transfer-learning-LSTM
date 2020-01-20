@@ -12,7 +12,7 @@ def save_lr_curve(model):
 	plt.title('model loss')
 	plt.ylabel('loss')
 	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper right')
+	plt.legend(['train', 'valid'], loc='upper right')
 	return plt 
 	
 def save_plot(y_test_time, y_pred_test_time):
