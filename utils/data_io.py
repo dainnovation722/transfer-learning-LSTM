@@ -13,6 +13,7 @@ def read_data_from_dataset(data_dir_path:str) -> np.array:
 def generator(X:np.array, y:np.array, time_steps:int) -> np.array:
     '''時系列バッチを取得する'''    
     n_batches = X.shape[0] - time_steps - 1
+    
     X_time = np.zeros((n_batches, time_steps, X.shape[1]))
     y_time = np.zeros((n_batches, 1))    
     for i in range(n_batches):
@@ -20,3 +21,9 @@ def generator(X:np.array, y:np.array, time_steps:int) -> np.array:
         y_time[i] = y[i+time_steps]               
     return X_time, y_time
 
+def split_dataset(X, y, ratio=0.8):
+    X_train = X[:int(X.shape[0]*ratio)]
+    y_train = y[:int(y.shape[0]*ratio)]
+    X_valid = X[int(X.shape[0]*ratio):]
+    y_valid = y[int(y.shape[0]*ratio):]
+    return X_train, y_train, X_valid, y_valid
