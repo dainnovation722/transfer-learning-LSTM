@@ -39,11 +39,7 @@ class regressor():
 		return model
 		
 
-	def fit(self, X, y, nb_batch, nb_epochs, callbacks, verbose):
-		X_train = X[:int(X.shape[0]*0.8)]
-		y_train = y[:int(y.shape[0]*0.8)]
-		X_valid = X[int(X.shape[0]*0.8):]
-		y_valid = y[int(y.shape[0]*0.8):]
+	def fit(self, X_train, y_train, X_valid, y_valid, nb_batch, nb_epochs, callbacks, verbose):
 		mini_batch_size = X_train.shape[0]//nb_batch
 		self.hist = self.model.fit(X_train, y_train, batch_size=mini_batch_size, epochs=nb_epochs,\
 			verbose=verbose, validation_data=(X_valid, y_valid), callbacks=callbacks)
