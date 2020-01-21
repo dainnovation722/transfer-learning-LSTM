@@ -55,11 +55,10 @@ def make_callbacks(file_path, write_output_dir):
 
 def main():	    
 
-	nb_batch = 10
+	nb_batch = 20
 	nb_epochs = 100
 	verbose = 1 #学習途中の経過
 	time_window = 1000
-	condition = sys.argv[2]
 	print('='*140)
 
 	parser = argparse.ArgumentParser() 
