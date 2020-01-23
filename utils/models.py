@@ -36,7 +36,7 @@ class regressor():
 		model = Model(inputs=input_layer, outputs=output_layer)
 
 		if pre_model:
-			for i in range(2,len(model.layers)): 
+			for i in range(2,len(model.layers)-1): 
 				model.layers[i].set_weights(pre_model.layers[i].get_weights())
 
 		model.compile(optimizer = Adam(), loss='mse', metrics=['accuracy'])
