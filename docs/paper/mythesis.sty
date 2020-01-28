@@ -1,0 +1,88 @@
+\ProvidesPackage{mythesis}
+
+% 基本的なパッケージ群
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{xparse}  % 発展的なマクロ定義
+% \usepackage{newpxtext,newpxmath}  % newpx font
+\usepackage{newtxtext,newtxmath}  % newpx font
+% \usepackage{ccfonts,eulervm}  % concrete + euler font
+\usepackage{bm}  % 太字表記のベクトル
+\usepackage[dvipdfmx,usenames]{color}  % 色の有効化
+\usepackage{caption}
+\usepackage[subrefformat=parens]{subcaption}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage[at]{easylist}  % @で箇条書きをカンタンに出す
+\usepackage{csvsimple}  % CSVから表を出力
+\usepackage[dvipdfmx,hyperref,caption]{xcolor}
+
+% ハイパーリンクをつける
+\usepackage[dvipdfmx]{hyperref}
+\usepackage{pxjahyper}
+\hypersetup{
+    linkbordercolor=cyan,
+    citebordercolor=cyan
+}
+
+% 余白や行間の設定
+\usepackage{geometry}
+\usepackage{setspace}
+\geometry{margin=3cm}  % 余白
+\setstretch{1}  % 行間
+
+% 相互参照
+\captionsetup{labelsep=space}
+\captionsetup[subfigure]{labelformat=simple}
+\renewcommand*{\thesubfigure}{(\alph{subfigure})}
+
+%------------------------------
+% 参考文献まわり
+%------------------------------
+
+\usepackage[
+    backend=biber,  % biberを使う
+    style=nature,
+    sorting=none,  % 参照順にソート
+    giveninits=true  % given nameを短縮
+]{biblatex}
+\usepackage{nameref}  % 見出しをrefできるようにする
+
+% bibファイルの設定
+\addbibresource{../library.bib}
+
+%------------------------------
+% マクロ群
+%------------------------------
+
+% TODOラベルなど
+\NewDocumentCommand \todo {m} {\colorbox{yellow}{todo: #1}\par}
+\NewDocumentCommand \memo {m} {\colorbox{Apricot}{#1}\par}
+
+% 用語説明マクロ
+% \term{日本語}[英語][英語略称] -> 日本語(英語, 英語略称)
+\NewDocumentCommand \term {m o o} {#1\IfNoValueF{#2}{~(#2\IfNoValueF{#3}{, #3})}}
+
+% 数式マクロ
+\DeclareMathOperator{\Enc}{Enc}
+\DeclareMathOperator{\Dec}{Dec}
+\DeclareMathOperator{\KL}{KL}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Loss}{Loss}
+
+\NewDocumentCommand \data {} {\mathrm{data}}
+\NewDocumentCommand \weight {} {\bm{W}}
+\NewDocumentCommand \bias {} {\bm{b}}
+\NewDocumentCommand \RR {} {R^2}
+\NewDocumentCommand \MAE {} {\mathrm{MAE}}
+\NewDocumentCommand \pred {} {_{\mathrm{pred}}}
+\NewDocumentCommand \val {} {_{\mathrm{val}}}
+\NewDocumentCommand \test {} {_{\mathrm{test}}}
+\NewDocumentCommand \xx {} {$\bm{x}$}
+\NewDocumentCommand \zz {} {$\bm{z}$}
+
+% 参照
+\renewcommand{\eqref}[1]{式~\ref{#1}}
+\newcommand{\figref}[1]{図~\ref{#1}}
+\newcommand{\tbref}[1]{表~\ref{#1}}
+\newcommand{\secref}[1]{\ref{#1}~節}

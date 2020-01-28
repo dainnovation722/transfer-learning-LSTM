@@ -1,0 +1,19 @@
+\chapter{実装に関する補足情報}
+
+\section{使用ライブラリ}
+
+実験に用いたライブラリと各々のバージョンを以下に示す。
+
+\begin{itemize}
+    \item pytorch: 0.4.1 \cite{pytorch}
+    \item keras: 2.1.3 \cite{keras}
+    \item scikit-learn: 0.19.1 \cite{scikit-learn}
+    \item rdkit: 2017.09.3.0 \cite{rdkit}
+\end{itemize}
+
+深層学習ライブラリとしては実験の初期にはKeras\cite{keras}を、以降はPyTorch\cite{pytorch}を利用した。
+Kerasは既にライブラリに組み込まれている手法を手早く実装するのに向いているが、
+GANなどの特殊な学習をさせる手法を実装するのには不向きである。
+PyTorchはPythonの作法に従って柔軟にネットワークを定義することができ、複雑な学習方法にも対応可能である。
+本研究ではPyTorchのバージョンは0.4.1を用いたが、現在では1.0.0が公開されている。
+今後生成モデルに関連する実験を行う際は1.0.0以降を用いるのが望ましい。

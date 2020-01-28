@@ -1,0 +1,51 @@
+%このファイルは日本語文字を含みます.
+\BOOKMARK [0][-]{chapter.1}{序論}{}% 1
+\BOOKMARK [1][-]{section.1.1}{背景}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.2}{本研究の目的と方針}{chapter.1}% 3
+\BOOKMARK [0][-]{chapter.2}{手法}{}% 4
+\BOOKMARK [1][-]{section.2.1}{深層学習}{chapter.2}% 5
+\BOOKMARK [2][-]{subsection.2.1.1}{ニューラルネットワーク}{section.2.1}% 6
+\BOOKMARK [2][-]{subsection.2.1.2}{誤差逆伝播法}{section.2.1}% 7
+\BOOKMARK [2][-]{subsection.2.1.3}{活性化関数}{section.2.1}% 8
+\BOOKMARK [2][-]{subsection.2.1.4}{多クラス分類への応用}{section.2.1}% 9
+\BOOKMARK [1][-]{section.2.2}{深層生成モデル}{chapter.2}% 10
+\BOOKMARK [2][-]{subsection.2.2.1}{Variational Autoencoders \(VAE\)}{section.2.2}% 11
+\BOOKMARK [2][-]{subsection.2.2.2}{Generative Adversarial Networks \(GAN\)}{section.2.2}% 12
+\BOOKMARK [2][-]{subsection.2.2.3}{Adversarial Autoencoders \(AAE\)}{section.2.2}% 13
+\BOOKMARK [2][-]{subsection.2.2.4}{Positive-Unlabeled GAN \(PUGAN\)}{section.2.2}% 14
+\BOOKMARK [1][-]{section.2.3}{深層学習で文字列を扱う手法}{chapter.2}% 15
+\BOOKMARK [2][-]{subsection.2.3.1}{文字列の埋め込み\(Embedding\)}{section.2.3}% 16
+\BOOKMARK [2][-]{subsection.2.3.2}{Recurrent Neural Network \(RNN\)}{section.2.3}% 17
+\BOOKMARK [2][-]{subsection.2.3.3}{Teacher Forcing}{section.2.3}% 18
+\BOOKMARK [2][-]{subsection.2.3.4}{Convolutional Neural Network \(CNN\)}{section.2.3}% 19
+\BOOKMARK [1][-]{section.2.4}{深層生成モデルを化学データに適用した先行研究}{chapter.2}% 20
+\BOOKMARK [2][-]{subsection.2.4.1}{化合物から連続的な潜在表現を取り出す}{section.2.4}% 21
+\BOOKMARK [2][-]{subsection.2.4.2}{種々の深層生成モデルを比較する}{section.2.4}% 22
+\BOOKMARK [1][-]{section.2.5}{提案手法}{chapter.2}% 23
+\BOOKMARK [2][-]{subsection.2.5.1}{VAEを用いた高精度な活性予測}{section.2.5}% 24
+\BOOKMARK [2][-]{subsection.2.5.2}{AAEを用いた構造提案}{section.2.5}% 25
+\BOOKMARK [2][-]{subsection.2.5.3}{PUGANを用いた構造提案}{section.2.5}% 26
+\BOOKMARK [0][-]{chapter.3}{ケーススタディ}{}% 27
+\BOOKMARK [1][-]{section.3.1}{データセット}{chapter.3}% 28
+\BOOKMARK [2][-]{subsection.3.1.1}{データセットの分割}{section.3.1}% 29
+\BOOKMARK [2][-]{subsection.3.1.2}{行った前処理}{section.3.1}% 30
+\BOOKMARK [1][-]{section.3.2}{VAEを用いた高精度な活性予測}{chapter.3}% 31
+\BOOKMARK [2][-]{subsection.3.2.1}{使用したアーキテクチャ}{section.3.2}% 32
+\BOOKMARK [2][-]{subsection.3.2.2}{比較した手法}{section.3.2}% 33
+\BOOKMARK [2][-]{subsection.3.2.3}{結果と考察}{section.3.2}% 34
+\BOOKMARK [1][-]{section.3.3}{AAEを用いた構造提案}{chapter.3}% 35
+\BOOKMARK [2][-]{subsection.3.3.1}{使用したアーキテクチャ}{section.3.3}% 36
+\BOOKMARK [2][-]{subsection.3.3.2}{生成構造の評価方法}{section.3.3}% 37
+\BOOKMARK [2][-]{subsection.3.3.3}{結果と考察}{section.3.3}% 38
+\BOOKMARK [2][-]{subsection.3.3.4}{課題と解決の方針}{section.3.3}% 39
+\BOOKMARK [1][-]{section.3.4}{PUGANを用いた構造提案}{chapter.3}% 40
+\BOOKMARK [2][-]{subsection.3.4.1}{使用したアーキテクチャ}{section.3.4}% 41
+\BOOKMARK [2][-]{subsection.3.4.2}{生成構造の評価方法}{section.3.4}% 42
+\BOOKMARK [2][-]{subsection.3.4.3}{結果と考察}{section.3.4}% 43
+\BOOKMARK [2][-]{subsection.3.4.4}{課題と解決の方針}{section.3.4}% 44
+\BOOKMARK [1][-]{section.3.5}{提案手法同士の比較}{chapter.3}% 45
+\BOOKMARK [0][-]{chapter.4}{結論}{}% 46
+\BOOKMARK [1][-]{section.4.1}{まとめ}{chapter.4}% 47
+\BOOKMARK [1][-]{section.4.2}{今後の展望}{chapter.4}% 48
+\BOOKMARK [0][-]{appendix.A}{実装に関する補足情報}{}% 49
+\BOOKMARK [1][-]{section.A.1}{使用ライブラリ}{appendix.A}% 50

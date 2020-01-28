@@ -1,0 +1,18 @@
+\section{提案手法同士の比較} \label{sec:result_total}
+
+\tbref{tb:valid_structure_ratio}に分布に従って$1,000$件サンプリングした際に正しいSMILESが生成する割合と、
+検証構造と一致する構造が生成した件数を示す。
+AAEが正しいSMILESが生成する割合、検証構造と一致した数ともに最も良い性能を示すことが分かった。
+\begin{table}[tbp]
+    \centering
+    \caption{$1,000$件サンプリングした際の各モデルの結果} \label{tb:valid_structure_ratio}
+    \begin{tabular}{lrr}\hline
+    モデル & 正しいSMILESの割合 & 検証構造と一致した構造数 \\\hline
+    VAE & $35.4\%$ & 0件 \\
+    AAE & $77.3\%$ & 6件 \\
+    PUGAN & $53.1\%$ & 1件 \\\hline
+    \end{tabular}
+\end{table}
+
+先行研究\cite{Blaschke2018}で示されている正しいSMILESの割合は$77\%$〜$78\%$程度であるため、
+AAEを利用した際の正しいSMILESの割合$77.3\%$は妥当な数字であると言える。
