@@ -18,6 +18,7 @@ from time import time
 from utils.data_io import *
 from utils.save import *
 from utils.models import regressor
+from utils.output import *
 	
 def save(model, y_test_time, y_pred_test_time,  write_output_dir):
 	save_lr_curve(model).savefig(write_output_dir + 'learning_curve.png')
@@ -56,7 +57,7 @@ def make_callbacks(file_path, write_output_dir):
 def main():	    
 
 	nb_batch = 20
-	nb_epochs = 100
+	nb_epochs = 1
 	verbose = 1 #学習途中の経過
 	time_window = 1000
 	print('='*140)
@@ -77,7 +78,7 @@ def main():
 			if not os.path.exists(f'{data_dir_path}/X_train.pkl'):continue
 			
 			# 保存先フォルダー作成
-			write_output_dir = f'{condition}/pre-train/{source}/'
+			write_output_dir = f'archives/{condition}/pre-train/{source}/'
 			if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
 			file_path = write_output_dir + 'best_model.hdf5'
 			
@@ -112,13 +113,13 @@ def main():
 			# pickleファイルがないtargetはスキップ
 			if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue		
 
-			for source in os.listdir(f'{condition}/pre-train'): 	
+			for source in os.listdir(f'archives/{condition}/pre-train'): 	
 				
 				#sourceとtargetが重複した際はスキップ
 				if source==target: continue
 				
 				# 保存先フォルダー作成
-				write_output_dir = f'{condition}/transfer-learning/to_{target}/from_{source}/'
+				write_output_dir = f'archives/{condition}/transfer-learning/to_{target}/from_{source}/'
 				if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
 				file_path = write_output_dir+'transferred_best_model.hdf5'
 				
@@ -128,7 +129,7 @@ def main():
 				X_train_time, y_train_time, X_valid_time, y_valid_time = split_dataset(X_train_time, y_train_time, ratio=0.8) 
 
 				# 事前学習済みモデルの読み込み
-				pre_model = load_model(f'{condition}/pre-train/{source}/best_model.hdf5')
+				pre_model = load_model(f'archives/{condition}/pre-train/{source}/best_model.hdf5')
 				
 				# callbacks作成
 				callbacks = make_callbacks(file_path, write_output_dir)
@@ -157,7 +158,7 @@ def main():
 			if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue				
 			
 			# 保存先フォルダー作成
-			write_output_dir = f'{condition}/without-transfer-learning/{target}/'
+			write_output_dir = f'archives/{condition}/without-transfer-learning/{target}/'
 			if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
 			file_path = write_output_dir+'transferred_best_model.hdf5'
 			
@@ -184,6 +185,9 @@ def main():
 
 			keras.backend.clear_session()
 			print('\n'*2+'='*140+'\n'*2)
+
+	if mode == 'output-results':
+			metrics(condition)
 
 if __name__ == '__main__':
 	main()
