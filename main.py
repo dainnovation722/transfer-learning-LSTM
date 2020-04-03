@@ -50,11 +50,11 @@ def parse_arguments():
                         help='whether to show the learning process (default : 1)')
     return parser.parse_args()
 
-def save(model, y_test_time, y_pred_test_time,  write_output_dir):
-	save_lr_curve(model).savefig(write_output_dir + 'learning_curve.png')
-	save_plot(y_test_time, y_pred_test_time).savefig(write_output_dir + 'prediction.png')
+def save(model, y_test_time, y_pred_test_time,  write_result_out_dir):
+	save_lr_curve(model).savefig(path.join(write_result_out_dir, 'learning_curve.png'))
+	save_plot(y_test_time, y_pred_test_time).savefig(path.join(write_result_out_dir, 'prediction.png'))
 	accuracy = mse(y_test_time,y_pred_test_time)
-	with open(write_output_dir+'log.txt','w') as f:
+	with open(path.join(write_result_out_dir, 'log.txt'),'w') as f:
 		f.write('accuracy : {:.3f}\n'.format(accuracy))
 		f.write('='*65+'\n')       
 		model.model.summary(print_fn=lambda x: f.write(x + '\n')) #モデルアーキテクチャー
@@ -93,7 +93,7 @@ def main():
 	# set seed
     seed_every_thing(args.seed)
 	
-	# make output directory
+	# make output base directory
     out_dir = args.out_dir
     write_out_dir = path.normpath(path.join(getcwd(), out_dir))
     makedirs(write_out_dir, exist_ok=True)
@@ -111,14 +111,18 @@ def main():
     train_ratio = args.train_ratio
     gpu = args.gpu
 	
-    print('='*140)
+    print('-'*140)
 
     if train_mode == 'pre-train':
         
         for source in os.listdir('dataset/source'):
+            
+            # make output directory
+            write_result_out_dir = path.join(write_out_dir, train_mode, source)
+            makedirs(write_result_out_dir, exist_ok=True)
 
             # skip source dataset without pickle file
-            data_dir_path = f'dataset/source/{source}' 
+            data_dir_path = path.join('dataset/target', source)
             if not os.path.exists(f'{data_dir_path}/X_train.pkl'):continue
             
             # load dataset
@@ -128,112 +132,109 @@ def main():
                 split_dataset(X_train_time, y_train_time, ratio=train_ratio) 
             
             # construct the model 
-            file_path = path.join(write_out_dir, 'best_model.hdf5')
+            file_path = path.join(write_result_out_dir, 'best_model.hdf5')
             callbacks = make_callbacks(file_path)
-            input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
+            input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is number of variable
             model = regressor(input_shape, gpu)
             
             # train the model
-            print('\nLearning from '+source)
-            print(f'\nSource Data Shape : {X_train_time.shape}\n')
+            print(f'\nSource dataset : {source}')
+            print(f'\nSource dataset shape : {X_train_time.shape}')
             model.fit(X_train_time, y_train_time, X_valid_time, y_valid_time, nb_batch, nb_epochs, callbacks, verbose)
             
             # prediction and saving
             best_model = load_model(file_path)
             y_pred_valid_time = best_model.predict(X_valid_time) 
-            save(model, y_valid_time, y_pred_valid_time, write_output_dir)
+            save(model, y_valid_time, y_pred_valid_time, write_result_out_dir)
             
             keras.backend.clear_session()
-            print('\n'*2+'='*140+'\n'*2)
+            print('\n'*2+'-'*140+'\n'*2)
 
     if train_mode == 'transfer-learning':
         
         for target in os.listdir('dataset/target'): 
             
-            # pickleファイルがないtargetはスキップ
+            # skip target in the absence of pickle file
             if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue		
 
-            for source in os.listdir(f'archives/{condition}/pre-train'): 	
+            for source in os.listdir(f'{write_out_dir}/pre-train'): 	
                 
-                #sourceとtargetが重複した際はスキップ
-                if source==target: continue
+                # skip target dataset if target is source 
+                if target==source: continue
                 
-                # 保存先フォルダー作成
-                write_output_dir = f'archives/{condition}/transfer-learning/to_{target}/from_{source}/'
-                if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
-                file_path = write_output_dir+'transferred_best_model.hdf5'
-                
-                # データセットの読み込み
+                # make output directory
+                write_result_out_dir = path.join(write_out_dir, train_mode, target, source)
+                makedirs(write_result_out_dir, exist_ok=True)
+                  
+                # load dataset
                 data_dir_path = f'dataset/target/{target}' 
-                X_train_time, y_train_time, X_test_time, y_test_time = load_dataset(data_dir_path, time_window)
-                X_train_time, y_train_time, X_valid_time, y_valid_time = split_dataset(X_train_time, y_train_time, ratio=train_ratio) 
+                X_train_time, y_train_time, X_test_time, y_test_time = \
+                    load_dataset(data_dir_path, time_window)
+                X_train_time, y_train_time, X_valid_time, y_valid_time = \
+                    split_dataset(X_train_time, y_train_time, ratio=train_ratio) 
 
-                # 事前学習済みモデルの読み込み
-                pre_model = load_model(f'archives/{condition}/pre-train/{source}/best_model.hdf5')
+                # load pre-trained model
+                pre_model = load_model(f'{write_out_dir}/pre-train/{source}/best_model.hdf5')
                 
-                # callbacks作成
-                callbacks = make_callbacks(file_path, write_output_dir)
-
-                print('\nTranfering from '+source+' to '+target)
-                print(f'\nTarget Data Shape : {X_train_time.shape}\n')
-                
-                #モデル構築→学習→推論
+                # construct the model 
+                file_path = path.join(write_result_out_dir, 'transferred_best_model.hdf5')
+                callbacks = make_callbacks(file_path)                
                 input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
-                model = regressor(input_shape, pre_model=pre_model)
-                model.fit(X_train_time, y_train_time, X_valid_time, y_valid_time, nb_batch, nb_epochs, callbacks, verbose)
-                best_model = load_model(file_path)
-                y_pred_test_time = best_model.predict(X_test_time) #予測には最高精度のモデルを使用
+                model = regressor(input_shape, gpu, pre_model=pre_model)
 
-                #学習結果の保存
-                save(model, y_test_time, y_pred_test_time, write_output_dir)
+                # train the model
+                print(f'\nTarget dataset : {target}')
+                print(f'\nSource dataset : {source}')
+                print(f'\nTarget dataset shape : {X_train_time.shape}')
+                model.fit(X_train_time, y_train_time, X_valid_time, y_valid_time, nb_batch, nb_epochs, callbacks, verbose)
+                
+                # prediction and saving
+                best_model = load_model(file_path)
+                y_pred_test_time = best_model.predict(X_test_time) 
+                save(model, y_test_time, y_pred_test_time, write_result_out_dir)
 
                 keras.backend.clear_session()
-                print('\n'*2+'='*140+'\n'*2)
+                print('\n'*2+'-'*140+'\n'*2)
 
     if train_mode == 'without-transfer-learning':
 
         for target in os.listdir('dataset/target'): 
-            
-            # pickleファイルがないtargetはスキップ
-            if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue				
-            
-            # 保存先フォルダー作成
-            write_output_dir = f'archives/{condition}/without-transfer-learning/{target}/'
-            if not os.path.exists(write_output_dir): os.makedirs(write_output_dir)
-            file_path = write_output_dir+'transferred_best_model.hdf5'
-            
-            # データセットの読み込み
-            data_dir_path = f'dataset/target/{target}' 
-            X_train_time, y_train_time, X_test_time, y_test_time = load_dataset(data_dir_path, time_window)
-            X_train_time, y_train_time, X_valid_time, y_valid_time = split_dataset(X_train_time, y_train_time, ratio=0.8) 
+      
+            # make output directory
+            write_result_out_dir = path.join(write_out_dir, train_mode, target)
+            makedirs(write_result_out_dir, exist_ok=True)
 
-            # callbacks作成
-            callbacks = make_callbacks(file_path, write_output_dir)
-        
-            print('\nLearning from '+target)
-            print(f'\nSource Data Shape : {X_train_time.shape}\n')
-                
-            #モデル構築→学習→推論
-            input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
-            model = regressor(input_shape)
+            # skip source dataset without pickle file
+            data_dir_path = path.join('dataset/target', target)
+            if not os.path.exists(f'{data_dir_path}/X_train.pkl'):continue
+            
+            # load dataset
+            X_train_time, y_train_time = \
+                load_dataset(data_dir_path, time_window, pre_train=True)
+            X_train_time, y_train_time, X_valid_time, y_valid_time = \
+                split_dataset(X_train_time, y_train_time, ratio=train_ratio) 
+            
+            # construct the model 
+            file_path = path.join(write_result_out_dir, 'best_model.hdf5')
+            callbacks = make_callbacks(file_path)
+            input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is number of variable
+            model = regressor(input_shape, gpu)
+            
+            # train the model
+            print(f'\nTarget dataset : {target}')
+            print(f'\nTarget dataset shape : {X_train_time.shape}')
             model.fit(X_train_time, y_train_time, X_valid_time, y_valid_time, nb_batch, nb_epochs, callbacks, verbose)
+            
+            # prediction and saving
             best_model = load_model(file_path)
-            y_pred_test_time = best_model.predict(X_test_time) #予測には最高精度のモデルを使用
-
-            #学習結果の保存
-            save(model, y_test_time, y_pred_test_time, write_output_dir)
-
+            y_pred_valid_time = best_model.predict(X_valid_time) 
+            save(model, y_valid_time, y_pred_valid_time, write_result_out_dir)
+            
             keras.backend.clear_session()
-            print('\n'*2+'='*140+'\n'*2)
+            print('\n'*2+'-'*140+'\n'*2)
 
     if train_mode == 'output-results':
             metrics(condition)
 
 if __name__ == '__main__':
 	main()
-	
-
-			
-
-			
-	
