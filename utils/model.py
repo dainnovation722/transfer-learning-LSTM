@@ -14,9 +14,6 @@ class regressor():
 	def build_model(self, input_shape:tuple, gpu, pre_model=None, verbose=True) -> list:			
 		if gpu:
 			from keras.layers import CuDNNLSTM as LSTM
-			print("="*20)
-			print('GPU')
-			print("="*20)
 		else:
 			from keras.layers import LSTM	 
 
