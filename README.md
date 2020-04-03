@@ -4,31 +4,27 @@ Transfer Learning LSTM for Time-Seires Regression
 ## Description
 This repository is a series of experiments on transfer learning for time-series data regression.
 
-## Requirement
-    pip install requirements.txt
-- keras
-- matplotlib
-- sklearn
-- numpy 
-- pickle
-- dtw
+## Getting Started
+    $ git clone https://github.com/dainnovation722/transfer-learning-LSTM.git
+    $ cd transfer-learning-LSTM
+    $ python -v venv venv
+    $ source venv/bin/activate
+    $ pip install -r requirements.txt
 
-## Usage
-You can train the model by source dataset.
+
+## Experiments
+
+### **1. Pre-train**  
+Pre-train the model by source dataset
 ```
-python main.py pre-train
+$ python main.py pre-train
 ```
-You can train the model by target dataset through transfer learning.
+### **2. Transfer learning**  
+Train the model by target dataset through pre-trained mode
 ```
-python main.py transfer-learning
-```
-You can see dataset shape by this code.
-```
-python main.py data-info
+$ python main.py transfer-learning
 ```
 
-## Install
-    git clone git@github.com:dainnovation722/transfer-learning-LSTM.git
 ## Contribution
 1. Fork it
 2. Create your feature branch (git checkout -b my-new-feature)
@@ -36,10 +32,6 @@ python main.py data-info
 4. Push to the branch (git push origin my-new-feature)
 5. Create new Pull Reques
 
-## Licence
-
-[MIT](https://github.com/tcnksm/tool/blob/master/LICENCE)
 
 ## Author
-
 [dainnovation722](https://github.com/dainnovation722)
