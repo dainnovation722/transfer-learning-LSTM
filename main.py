@@ -7,14 +7,14 @@ import tensorflow as tf
 import numpy as np
 from sklearn.metrics import mean_squared_error as mse
 from sys import exit
-from os import path, getcwd, makedirs, environ
+from os import path, getcwd, makedirs, environ, listdir
 from time import time
 
 from keras.models import load_model
 from keras.callbacks import CSVLogger, ModelCheckpoint, ReduceLROnPlateau
+from utils.model import regressor
 from utils.data_io import *
 from utils.save import *
-from utils.model import regressor
 from utils.output import *
 	
 def seed_every_thing(seed=1234):
@@ -37,8 +37,8 @@ def parse_arguments():
     parser.add_argument('--time-window', default=1000, type=int, 
                         help='length of time to capture at once (default : 1000)')
     # for training
-    parser.add_argument('--train-mode', default='pre-train', type=str, 
-                        help='"pre-train", "transfer-learning", "without-transfer-learning" (default : pre-train)')
+    parser.add_argument('--train-mode', '-m', default='pre-train', type=str, 
+                        help='"pre-train", "transfer-learning", "without-transfer-learning", "score" (default : pre-train)')
     parser.add_argument('--gpu', action='store_true', 
                         help='whether to do calculations on gpu machines (default : True)')
     parser.add_argument('--nb-epochs', default=1, type=int, 
@@ -95,7 +95,7 @@ def main():
 	
 	# make output base directory
     out_dir = args.out_dir
-    write_out_dir = path.normpath(path.join(getcwd(), out_dir))
+    write_out_dir = path.normpath(path.join(getcwd(), 'reports', out_dir))
     makedirs(write_out_dir, exist_ok=True)
 	
 	# save arguments
@@ -110,20 +110,20 @@ def main():
     train_mode = args.train_mode
     train_ratio = args.train_ratio
     gpu = args.gpu
-	
-    print('-'*140)
 
+    print('-'*140)
+    
     if train_mode == 'pre-train':
         
-        for source in os.listdir('dataset/source'):
+        for source in listdir('dataset/source'):  
+
+            # skip source dataset without pickle file
+            data_dir_path = path.join('dataset','source', source)
+            if not path.exists(f'{data_dir_path}/X_train.pkl'):continue
             
             # make output directory
             write_result_out_dir = path.join(write_out_dir, train_mode, source)
             makedirs(write_result_out_dir, exist_ok=True)
-
-            # skip source dataset without pickle file
-            data_dir_path = path.join('dataset/target', source)
-            if not os.path.exists(f'{data_dir_path}/X_train.pkl'):continue
             
             # load dataset
             X_train_time, y_train_time = \
@@ -149,15 +149,16 @@ def main():
             
             keras.backend.clear_session()
             print('\n'*2+'-'*140+'\n'*2)
-
-    if train_mode == 'transfer-learning':
         
-        for target in os.listdir('dataset/target'): 
-            
-            # skip target in the absence of pickle file
-            if not os.path.exists(f'dataset/target/{target}/X_train.pkl'): continue		
 
-            for source in os.listdir(f'{write_out_dir}/pre-train'): 	
+    elif train_mode == 'transfer-learning':
+        
+        for target in listdir('dataset/target'): 
+        
+            # skip target in the absence of pickle file
+            if not path.exists(f'dataset/target/{target}/X_train.pkl'): continue		
+
+            for source in listdir(f'{write_out_dir}/pre-train'): 	
                 
                 # skip target dataset if target is source 
                 if target==source: continue
@@ -165,7 +166,7 @@ def main():
                 # make output directory
                 write_result_out_dir = path.join(write_out_dir, train_mode, target, source)
                 makedirs(write_result_out_dir, exist_ok=True)
-                  
+                    
                 # load dataset
                 data_dir_path = f'dataset/target/{target}' 
                 X_train_time, y_train_time, X_test_time, y_test_time = \
@@ -195,18 +196,18 @@ def main():
 
                 keras.backend.clear_session()
                 print('\n'*2+'-'*140+'\n'*2)
+    
+    elif train_mode == 'without-transfer-learning':
 
-    if train_mode == 'without-transfer-learning':
-
-        for target in os.listdir('dataset/target'): 
-      
+        for target in listdir('dataset/target'): 
+        
             # make output directory
             write_result_out_dir = path.join(write_out_dir, train_mode, target)
             makedirs(write_result_out_dir, exist_ok=True)
 
             # skip source dataset without pickle file
-            data_dir_path = path.join('dataset/target', target)
-            if not os.path.exists(f'{data_dir_path}/X_train.pkl'):continue
+            data_dir_path = path.join('dataset', 'target', target)
+            if not path.exists(f'{data_dir_path}/X_train.pkl'):continue
             
             # load dataset
             X_train_time, y_train_time = \
@@ -233,8 +234,9 @@ def main():
             keras.backend.clear_session()
             print('\n'*2+'-'*140+'\n'*2)
 
-    if train_mode == 'output-results':
-            metrics(condition)
+    # make results easy to see
+    elif train_mode == 'score':
+        metrics(write_out_dir)
 
 if __name__ == '__main__':
 	main()
