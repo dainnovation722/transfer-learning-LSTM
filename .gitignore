@@ -9,3 +9,7 @@ release
 .sass-cache
 __pycache__/
 venv/
+
+# results
+reports/
+job_archive/
