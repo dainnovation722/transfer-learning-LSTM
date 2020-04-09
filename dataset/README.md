@@ -8,8 +8,7 @@
 │   ├── electricity
 │   ├── exchange_rate
 │   ├── metro_interstate
-│   ├── traffic
-│   └── usv
+│   └── traffic
 └── target
     ├── debutanizer
     └── sru
