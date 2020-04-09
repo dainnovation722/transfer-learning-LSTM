@@ -13,3 +13,6 @@ venv/
 # results
 reports/
 job_archive/
+
+# job execution
+cluster_execution.sh
