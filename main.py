@@ -12,6 +12,7 @@ from time import time
 
 from keras.models import load_model
 from keras.callbacks import CSVLogger, ModelCheckpoint, ReduceLROnPlateau
+from keras.utils import plot_model
 from utils.model import regressor
 from utils.data_io import *
 from utils.save import *
@@ -135,8 +136,8 @@ def main():
             file_path = path.join(write_result_out_dir, 'best_model.hdf5')
             callbacks = make_callbacks(file_path)
             input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is number of variable
-            model = regressor(input_shape, gpu)
-            
+            model = regressor(input_shape, gpu, write_result_out_dir)    
+
             # train the model
             print(f'\nSource dataset : {source}')
             print(f'\nSource dataset shape : {X_train_time.shape}')
@@ -181,8 +182,8 @@ def main():
                 file_path = path.join(write_result_out_dir, 'transferred_best_model.hdf5')
                 callbacks = make_callbacks(file_path)                
                 input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is num of variable
-                model = regressor(input_shape, gpu, pre_model=pre_model)
-
+                model = regressor(input_shape, gpu, write_result_out_dir, pre_model=pre_model)
+        
                 # train the model
                 print(f'\nTarget dataset : {target}')
                 print(f'\nSource dataset : {source}')
@@ -219,7 +220,7 @@ def main():
             file_path = path.join(write_result_out_dir, 'best_model.hdf5')
             callbacks = make_callbacks(file_path)
             input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is number of variable
-            model = regressor(input_shape, gpu)
+            model = regressor(input_shape, gpu, write_result_out_dir)
             
             # train the model
             print(f'\nTarget dataset : {target}')
