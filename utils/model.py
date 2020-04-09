@@ -1,17 +1,18 @@
 from keras.layers import Input, Dense, Activation, BatchNormalization
 from keras.layers.wrappers import TimeDistributed
 from keras.models import Model
+from keras.utils import plot_model
 from keras.optimizers import Adam
 from keras import initializers,regularizers
 
 	
 class regressor():
 
-	def __init__(self, input_shape, gpu, pre_model=None):
-		self.model = self.build_model(input_shape, gpu, pre_model=pre_model)
+	def __init__(self, input_shape, gpu, write_result_out_dir, pre_model=None):
+		self.model = self.build_model(input_shape, gpu, write_result_out_dir, pre_model=pre_model)
 		self.hist = None
 	
-	def build_model(self, input_shape:tuple, gpu, pre_model=None, verbose=True) -> list:			
+	def build_model(self, input_shape:tuple, gpu, write_result_out_dir, pre_model=None, verbose=True) -> list:			
 		if gpu:
 			from keras.layers import CuDNNLSTM as LSTM
 		else:
@@ -68,6 +69,7 @@ class regressor():
 						)(lstm3)
 
 		model = Model(inputs=input_layer, outputs=output_layer)
+		plot_model(model, to_file=f'{write_result_out_dir}/model.png', show_shapes=True, show_layer_names=False)
 
 		# transfer weights from pre-trained model
 		if pre_model:
