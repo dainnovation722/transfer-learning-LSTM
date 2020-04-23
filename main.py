@@ -56,9 +56,9 @@ def save(model, y_test_time, y_pred_test_time,  write_result_out_dir):
 	save_plot(y_test_time, y_pred_test_time).savefig(path.join(write_result_out_dir, 'prediction.png'))
 	accuracy = mse(y_test_time,y_pred_test_time)
 	with open(path.join(write_result_out_dir, 'log.txt'),'w') as f:
-		f.write('accuracy : {:.3f}\n'.format(accuracy))
+		f.write('accuracy : {:.6f}\n'.format(accuracy))
 		f.write('='*65+'\n')       
-		model.model.summary(print_fn=lambda x: f.write(x + '\n')) #モデルアーキテクチャー
+		model.model.summary(print_fn=lambda x: f.write(x + '\n')) 
 
 def load_dataset(data_dir_path, time_window, pre_train=None):
 	X_train, y_train, X_test, y_test = read_data_from_dataset(data_dir_path)
@@ -71,9 +71,9 @@ def load_dataset(data_dir_path, time_window, pre_train=None):
 		return X_train_time, y_train_time
 	# in case of transfer-learning
 	if X_train.shape[0] > X_test.shape[0]:
-		time_steps = time_window if X_test.shape[0]//2 > time_window else X_test.shape[0]//2 # ここのハイパラは調整する価値あり!
+		time_steps = time_window if X_test.shape[0]//2 > time_window else X_test.shape[0]//2 # Need to optimize time_window...
 	else:
-		time_steps = time_window if X_train.shape[0]//2 > time_window else X_train.shape[0]//2 # ここのハイパラは調整する価値あり!
+		time_steps = time_window if X_train.shape[0]//2 > time_window else X_train.shape[0]//2 
 	X_train_time, y_train_time = generator(X_train, y_train, time_steps)
 	X_test_time, y_test_time = generator(X_test, y_test, time_steps)
 	return X_train_time, y_train_time, X_test_time, y_test_time
@@ -137,7 +137,7 @@ def main():
             callbacks = make_callbacks(file_path)
             input_shape = (X_train_time.shape[1], X_train_time.shape[2]) # x_train.shape[2] is number of variable
             model = regressor(input_shape, gpu, write_result_out_dir)    
-
+            
             # train the model
             print(f'\nSource dataset : {source}')
             print(f'\nSource dataset shape : {X_train_time.shape}')
