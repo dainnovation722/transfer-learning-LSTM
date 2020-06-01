@@ -17,7 +17,7 @@ from utils.model import regressor
 from utils.data_io import read_data_from_dataset, generator, split_dataset
 from utils.save import save_lr_curve, save_prediction_plot, save_yy_plot, save_mse
 from utils.output import metrics
-    
+
 
 def seed_every_thing(seed=1234):
     environ['PYTHONHASHSEED'] = str(seed)
