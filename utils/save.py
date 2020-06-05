@@ -7,18 +7,18 @@ import numpy as np
 plt.rcParams["font.size"] = 13
 
 
-def save_lr_curve(model, out_dir: str):
+def save_lr_curve(H, out_dir: str):
     """save learning curve in deep learning
 
     Args:
         model : trained model (keras)
         out_dir (str): directory path for saving
     """
-    hist = model.hist
+    
     plt.figure(figsize=(18, 5))
     plt.rcParams["font.size"] = 18
-    plt.plot(hist.history['loss'])
-    plt.plot(hist.history['val_loss'])
+    plt.plot(H.history['loss'])
+    plt.plot(H.history['val_loss'])
     plt.title('model loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
@@ -100,4 +100,4 @@ def save_mse(y_test_time: np.array, y_pred_test_time: np.array, out_dir: str, mo
         f.write('accuracy : {:.6f}\n'.format(accuracy))
         f.write('=' * 65 + '\n')
         if model:
-            model.model.summary(print_fn=lambda x: f.write(x + '\n'))
+            model.summary(print_fn=lambda x: f.write(x + '\n'))
