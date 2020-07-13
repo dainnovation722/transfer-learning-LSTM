@@ -5,6 +5,7 @@ from keras.models import Model
 from keras.utils import plot_model
 from keras.optimizers import Adam
 from keras import initializers, regularizers
+import numpy as np
 
 
 def build_model(input_shape: tuple,
@@ -13,7 +14,8 @@ def build_model(input_shape: tuple,
                 pre_model=None,
                 freeze=False,
                 noise=None,
-                verbose=True):
+                verbose=True,
+                savefig=True):
 
     if gpu:
         from keras.layers import CuDNNLSTM as LSTM
@@ -24,7 +26,7 @@ def build_model(input_shape: tuple,
     input_layer = Input(input_shape)
     
     if noise:
-        noise_input = GaussianNoise(noise)(input_layer)
+        noise_input = GaussianNoise(np.sqrt(noise))(input_layer)
         dense = TimeDistributed(
             Dense(
                 10,
@@ -73,7 +75,8 @@ def build_model(input_shape: tuple,
     )(lstm2)
 
     model = Model(inputs=input_layer, outputs=output_layer)
-    plot_model(model, to_file=f'{write_result_out_dir}/architecture.png', show_shapes=True, show_layer_names=False)
+    if savefig:
+        plot_model(model, to_file=f'{write_result_out_dir}/architecture.png', show_shapes=True, show_layer_names=False)
     
     # transfer weights from pre-trained model
     if pre_model:

@@ -71,12 +71,12 @@ class ReccurentTrainingGenerator(Sequence):
     """ Reccurent レイヤーを訓練するためのデータgeneratorクラス """
     def _resetindices(self):
         """バッチとして出力するデータのインデックスを乱数で生成する """
-        self.num_called = 0 # 同一のエポック内で __getitem__　メソッドが呼び出された回数
+        self.num_called = 0  # 同一のエポック内で __getitem__　メソッドが呼び出された回数
         
         all_idx = np.random.permutation(np.arange(self.num_samples))
         remain_idx = np.random.choice(np.arange(self.num_samples),
                                       size=(self.steps_per_epoch * self.batch_size - len(all_idx)),
-                                      replace=False)
+                                      replace=False)  # 足らない分を重複indexで補う
         self.indices = np.hstack([all_idx, remain_idx]).reshape(self.steps_per_epoch, self.batch_size)
         
     def __init__(self, x_set, y_set, batch_size, timesteps, delay):
@@ -152,8 +152,10 @@ def decompose_time_series(x):
     best_score = np.inf
     print('decomposing time series data ・・・・・')
     for period in tqdm(range(1, step + 1)):
-        decompose_result = sm.tsa.seasonal_decompose(pd.Series(x), period=period, model='additive',extrapolate_trend='freq')
-        score = np.sum(decompose_result.resid)
+        decompose_result = sm.tsa.seasonal_decompose(pd.Series(x), period=period, model='additive', extrapolate_trend='freq')
+        print(len(np.where(decompose_result.resid < 0)[0]))
+        score = np.sum(np.abs(decompose_result.resid))
+
         if score < best_score:
             best_period = period
             best_score = score
